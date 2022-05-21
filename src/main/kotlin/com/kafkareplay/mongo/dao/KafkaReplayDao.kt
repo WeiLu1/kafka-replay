@@ -7,6 +7,6 @@ data class KafkaReplayDao (
   @Id
   val id: UUID,
   val topic: String,
-  val paylaod: String,
+  val payload: String,
   val exceptionStacktrace: String,
 )

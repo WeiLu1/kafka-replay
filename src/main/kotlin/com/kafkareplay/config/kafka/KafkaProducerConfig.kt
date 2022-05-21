@@ -22,13 +22,13 @@ class KafkaProducerConfig(
     ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java
   )
 
-  fun producerFactory(): ProducerFactory<Int?, String?> {
+  fun producerFactory(): ProducerFactory<String, String> {
     return DefaultKafkaProducerFactory(producerProps)
   }
 
 
   @Bean
-  fun kafkaTemplate(): KafkaTemplate<Int?, String?>? {
+  fun kafkaTemplate(): KafkaTemplate<String, String> {
     return KafkaTemplate(producerFactory())
   }
 }
