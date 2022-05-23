@@ -1,11 +1,10 @@
 package com.kafkareplay.controller
 
 import com.kafkareplay.service.KafkaReplayService
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-@Controller
+@RestController
 @RequestMapping("/internal/v1")
 class KafkaReplayController(
   private val kafkaReplayService: KafkaReplayService
