@@ -9,6 +9,7 @@ import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
+import org.springframework.kafka.support.serializer.JsonSerializer
 
 @EnableKafka
 @Configuration
@@ -19,16 +20,17 @@ class KafkaProducerConfig(
   val producerProps = mapOf(
     ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to server,
     ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-    ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java
+    ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to JsonSerializer::class.java
   )
 
-  fun producerFactory(): ProducerFactory<String, String> {
+  @Bean
+  fun producerFactory(): ProducerFactory<String, Any> {
     return DefaultKafkaProducerFactory(producerProps)
   }
 
 
   @Bean
-  fun kafkaTemplate(): KafkaTemplate<String, String> {
+  fun kafkaTemplate(): KafkaTemplate<String, Any> {
     return KafkaTemplate(producerFactory())
   }
 }

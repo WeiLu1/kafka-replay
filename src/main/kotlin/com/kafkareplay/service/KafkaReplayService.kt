@@ -2,6 +2,7 @@ package com.kafkareplay.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.kafkareplay.kafka.RetryTopicSender
+import com.kafkareplay.mongo.dao.KafkaReplayDao
 import com.kafkareplay.mongo.repository.KafkaReplayMongoRepository
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.stereotype.Service
@@ -13,10 +14,6 @@ class KafkaReplayService(
   private val retrySender: RetryTopicSender,
   private val objectMapper: ObjectMapper
 ) {
-
-  companion object {
-    private val logger = getLogger(KafkaReplayService::class.java)
-  }
 
   fun deleteMessage(id: UUID) {
     kafkaReplayMongoRepository.deleteById(id)
@@ -34,24 +31,30 @@ class KafkaReplayService(
     kafkaReplayMongoRepository.findAll()
   }
 
+  fun saveMessage(topic: String, key: String, payload: String, exceptionStacktrace: String) {
+    val uuid = UUID.randomUUID()
+    val obj = KafkaReplayDao(
+      id = uuid,
+      topic = topic.replace("_ERROR", "_RETRY"),
+      key = key,
+      payload = payload,
+      exceptionStacktrace = exceptionStacktrace
+    )
+    kafkaReplayMongoRepository.save(obj)
+  }
+
   fun retryMessage(id: UUID) {
-    val message = objectMapper.writeValueAsString(kafkaReplayMongoRepository.findById(id))
-    retrySender.send(message)
+    val message = kafkaReplayMongoRepository.findById(id)
+    retrySender.send(message.get().topic, message.get().key, message.get().payload)
     kafkaReplayMongoRepository.deleteById(id)
   }
 
-  fun retryAllMessages() {
-    val everyDoc = kafkaReplayMongoRepository.findAll()
-    for (doc in everyDoc) {
-      runCatching {
-        retrySender.send(doc.payload)
-        kafkaReplayMongoRepository.deleteById(doc.id)
-      }.onSuccess {
-        logger.info("${doc.id} successfully sent and deleted from database.")
-      }.onFailure { exception: Throwable ->
-        logger.error("Something has gone wrong with ${doc.id}.")
-        throw exception
-      }
-    }
+  fun retryAllMessages(topic: String) {
+    TODO("Front end will have drop down to select all messages in topic to retry")
+//    val everyDoc = kafkaReplayMongoRepository.findAll()
+//    for (doc in everyDoc) {
+//      retrySender.send(doc.get().topic, doc.get().key, doc.get().payload)
+//      kafkaReplayMongoRepository.deleteById(doc.id)
+//    }
   }
 }

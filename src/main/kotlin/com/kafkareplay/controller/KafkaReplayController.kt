@@ -41,8 +41,13 @@ class KafkaReplayController(
     kafkaReplayService.retryMessage(id)
   }
 
-  @PostMapping()
-  fun retryAllMessages() {
-    kafkaReplayService.retryAllMessages()
+//  @PostMapping()
+//  fun retryAllMessages() {
+//    kafkaReplayService.retryAllMessages()
+//  }
+
+  @GetMapping("/topics")
+  fun getAllTopics() {
+    TODO()
   }
 }
