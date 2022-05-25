@@ -29,6 +29,13 @@ class KafkaReplayController(
     kafkaReplayService.getMessage(id)
   }
 
+  @GetMapping("/{topic}")
+  fun getAllMessagesByTopic(
+    @PathVariable("topic") topic: String
+  ) {
+    kafkaReplayService.getMessagesByTopic(topic)
+  }
+
   @GetMapping()
   fun getAllMessages() {
     kafkaReplayService.getAllMessages()
@@ -41,13 +48,15 @@ class KafkaReplayController(
     kafkaReplayService.retryMessage(id)
   }
 
-//  @PostMapping()
-//  fun retryAllMessages() {
-//    kafkaReplayService.retryAllMessages()
-//  }
+  @PostMapping("/{topic}")
+  fun retryAllMessages(
+    @PathVariable("topic") topic: String
+  ) {
+    kafkaReplayService.retryAllMessagesByTopic(topic)
+  }
 
   @GetMapping("/topics")
   fun getAllTopics() {
-    TODO()
+    kafkaReplayService.getAllTopics()
   }
 }
