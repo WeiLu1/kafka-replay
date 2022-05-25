@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/internal/v1")
+@RequestMapping("/internal/v1/messages")
 class KafkaReplayController(
   private val kafkaReplayService: KafkaReplayService
 ) {
@@ -29,7 +29,7 @@ class KafkaReplayController(
     kafkaReplayService.getMessage(id)
   }
 
-  @GetMapping("/{topic}")
+  @GetMapping("/topic/{topic}")
   fun getAllMessagesByTopic(
     @PathVariable("topic") topic: String
   ) {
@@ -41,6 +41,11 @@ class KafkaReplayController(
     kafkaReplayService.getAllMessages()
   }
 
+  @GetMapping("/topics")
+  fun getAllTopics() {
+    kafkaReplayService.getAllTopics()
+  }
+
   @PostMapping("/{id}")
   fun retryMessage(
     @PathVariable("id") id: UUID
@@ -48,15 +53,10 @@ class KafkaReplayController(
     kafkaReplayService.retryMessage(id)
   }
 
-  @PostMapping("/{topic}")
+  @PostMapping("/topic/{topic}")
   fun retryAllMessages(
     @PathVariable("topic") topic: String
   ) {
     kafkaReplayService.retryAllMessagesByTopic(topic)
-  }
-
-  @GetMapping("/topics")
-  fun getAllTopics() {
-    kafkaReplayService.getAllTopics()
   }
 }
