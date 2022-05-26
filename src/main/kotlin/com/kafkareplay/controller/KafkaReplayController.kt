@@ -66,7 +66,9 @@ class KafkaReplayController(
   @PostMapping("/topic/{topic}")
   fun retryAllMessagesByTopic(
     @PathVariable("topic") topic: String
-  ) {
-    kafkaReplayService.retryAllMessagesByTopic(topic)
+  ): List<KafkaReplayResponse> {
+    return kafkaReplayService.retryAllMessagesByTopic(topic).map {
+      convertToResponseDto(it)
+    }
   }
 }

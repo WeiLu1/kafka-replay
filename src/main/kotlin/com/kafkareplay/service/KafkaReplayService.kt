@@ -64,12 +64,15 @@ class KafkaReplayService(
     return deleteMessage(id)
   }
 
-  fun retryAllMessagesByTopic(topic: String) {
-    val messages = getMessagesByTopic(topic)
-    for (message in messages) {
-      retrySender.send(message.topic, message.key, message.payload)
-      kafkaReplayMongoRepository.deleteById(message.id)
+  fun retryAllMessagesByTopic(topic: String): List<KafkaReplayDao> {
+    val responseList = mutableListOf<KafkaReplayDao>()
+
+    getMessagesByTopic(topic).forEach {
+      retrySender.send(it.topic, it.key, it.payload)
+      kafkaReplayMongoRepository.delete(it)
+      responseList.add(it)
     }
+    return responseList
   }
 
 }
