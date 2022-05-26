@@ -1,5 +1,6 @@
 package com.kafkareplay.service
 
+import com.kafkareplay.exception.KafkaReplayNotFoundException
 import com.kafkareplay.kafka.RetryTopicSender
 import com.kafkareplay.mongo.dao.KafkaReplayDao
 import com.kafkareplay.mongo.repository.KafkaReplayMongoRepository
@@ -12,28 +13,37 @@ class KafkaReplayService(
   private val retrySender: RetryTopicSender,
 ) {
 
-  fun deleteMessage(id: UUID) {
-    kafkaReplayMongoRepository.deleteById(id)
+
+  fun deleteMessage(id: UUID): KafkaReplayDao {
+    val message = getMessage(id)
+    kafkaReplayMongoRepository.delete(message)
+    return message
   }
 
-  fun deleteAllMessages() {
-    kafkaReplayMongoRepository.deleteAll()
+  fun deleteAllMessagesByTopic(topic: String): List<KafkaReplayDao> {
+    val messaages = getMessagesByTopic(topic)
+    kafkaReplayMongoRepository.deleteAllByTopic(topic)
+    return messaages
   }
 
-  fun getMessage(id: UUID) {
-    kafkaReplayMongoRepository.findById(id)
+  fun getMessage(id: UUID): KafkaReplayDao {
+    return kafkaReplayMongoRepository.findById(id).orElseThrow {
+      KafkaReplayNotFoundException(id)
+    }
   }
 
-  fun getMessagesByTopic(topic: String) {
-    kafkaReplayMongoRepository.findAllByTopic(topic)
+  fun getMessagesByTopic(topic: String): List<KafkaReplayDao> {
+    return kafkaReplayMongoRepository.findAllByTopic(topic)
   }
 
-  fun getAllMessages() {
-    kafkaReplayMongoRepository.findAll()
+  fun getAllMessages(): List<KafkaReplayDao> {
+    return kafkaReplayMongoRepository.findAll()
   }
 
-  fun getAllTopics() {
-    kafkaReplayMongoRepository.findAllTopicNames()
+  fun getAllTopics(): List<String> {
+    return kafkaReplayMongoRepository.findAll().map {
+      it.topic
+    }.distinct()
   }
 
   fun saveMessage(topic: String, key: String, payload: String, exceptionStacktrace: String) {
@@ -48,17 +58,18 @@ class KafkaReplayService(
     kafkaReplayMongoRepository.save(obj)
   }
 
-  fun retryMessage(id: UUID) {
-    val message = kafkaReplayMongoRepository.findById(id)
-    retrySender.send(message.get().topic, message.get().key, message.get().payload)
-    kafkaReplayMongoRepository.deleteById(id)
+  fun retryMessage(id: UUID): KafkaReplayDao {
+    val message = getMessage(id)
+    retrySender.send(message.topic, message.key, message.payload)
+    return deleteMessage(id)
   }
 
   fun retryAllMessagesByTopic(topic: String) {
-    val messages = kafkaReplayMongoRepository.findAllByTopic(topic)
+    val messages = getMessagesByTopic(topic)
     for (message in messages) {
       retrySender.send(message.topic, message.key, message.payload)
       kafkaReplayMongoRepository.deleteById(message.id)
     }
   }
+
 }

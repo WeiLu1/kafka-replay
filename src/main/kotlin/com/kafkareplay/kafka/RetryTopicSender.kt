@@ -6,6 +6,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Component
+import kotlin.reflect.typeOf
 
 @Component
 class RetryTopicSender(
@@ -23,6 +24,6 @@ class RetryTopicSender(
       .setHeader(KafkaHeaders.MESSAGE_KEY, key)
       .build();
 
-    kafkaTemplate.send(message)
+   kafkaTemplate.send(message)
   }
 }

@@ -10,6 +10,5 @@ import java.util.*
 interface KafkaReplayMongoRepository : MongoRepository<KafkaReplayDao, UUID> {
   fun findAllByTopic(topic: String): List<KafkaReplayDao>
 
-  @Query("db.failed-messages.distinct(topic)")
-  fun findAllTopicNames(): List<String>
+  fun deleteAllByTopic(topic: String)
 }
