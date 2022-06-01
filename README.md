@@ -61,7 +61,7 @@ Responses will be of the form:
 {
     "id": "<UUID>",
     "topic": "<Topic_Name>_RETRY",
-    "key": "<UUID",
+    "key": "<UUID>",
     "payload": "{...}",
     "exceptionStacktrace": "..."
 }
