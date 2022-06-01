@@ -3,7 +3,7 @@ This is a prototype service which listens to error topics in kafka which are use
 main topic and are re-routed. Then they will be persisted into a mongodb database.
 
 Use the docker-compose file provided by either [kafka-failure](https://github.com/anojkunes/kafka-retry-service)
-or [kafka-replay](https://github.com/WeiLu1/kafka-replay) to spin up the docker network.\
+or [kafka-replay](https://github.com/WeiLu1/kafka-replay) to spin up the docker network.
 ```bash
 docker compose up -d
 ```
