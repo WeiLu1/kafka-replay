@@ -16,8 +16,6 @@ Run both the `kafka-replay` and `kafka-failure` services together.
 - Kafka
 - MongoDB
 
-
-
 ## Endpoints
 ### kafka-replay
 

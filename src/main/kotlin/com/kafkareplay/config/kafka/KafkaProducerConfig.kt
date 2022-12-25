@@ -20,7 +20,7 @@ class KafkaProducerConfig(
   val producerProps = mapOf(
     ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to server,
     ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-    ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to JsonSerializer::class.java
+    ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java
   )
 
   @Bean

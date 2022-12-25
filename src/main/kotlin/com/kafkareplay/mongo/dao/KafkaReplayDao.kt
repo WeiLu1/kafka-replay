@@ -12,4 +12,5 @@ data class KafkaReplayDao (
   val key: String,
   val payload: String,
   val exceptionStacktrace: String,
+  val headers: Map<String, Any>
 )

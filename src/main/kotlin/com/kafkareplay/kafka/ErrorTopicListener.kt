@@ -1,6 +1,8 @@
 package com.kafkareplay.kafka
 
 import com.kafkareplay.service.KafkaReplayService
+import com.kafkareplay.utils.KafkaReplayConverter.convertToBase64
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.KafkaHeaders
@@ -18,16 +20,19 @@ class ErrorTopicListener(
   }
 
   @KafkaListener(topicPattern = ".*_ERROR", containerFactory = "kafkaListenerContainerFactory", groupId = "ms-kafka-replay")
-  fun onErrorEvent(@Payload event: String,
+  fun onErrorEvent(@Payload event: ConsumerRecord<String, String>,
                    @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String,
                    @Header(KafkaHeaders.DLT_EXCEPTION_STACKTRACE) exceptionMessage: String,
                    @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) key: String
 
   ) {
-    LOG.info("Payload: {}", event)
-    LOG.info("key: {}, event:{}", key, event)
+    LOG.info("Payload: {} - Base64: {}", event.value(), convertToBase64(event.value()))
+    LOG.info("key: {}, event:{}", event.key(), event)
     LOG.info("Error Message:{}", exceptionMessage)
 
-    kafkaReplayService.saveMessage(topic, key, event, exceptionMessage)
+    val headers = event.headers().associate { Pair(it.key(), it.value()) }
+    LOG.info("Headers:{}", headers)
+
+    kafkaReplayService.saveMessage(topic, key, convertToBase64(event.value()), exceptionMessage, headers)
   }
 }

@@ -1,18 +1,27 @@
 package com.kafkareplay.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.kafkareplay.exception.KafkaReplayNotFoundException
+import com.kafkareplay.kafka.ErrorTopicListener
 import com.kafkareplay.kafka.RetryTopicSender
 import com.kafkareplay.mongo.dao.KafkaReplayDao
 import com.kafkareplay.mongo.repository.KafkaReplayMongoRepository
+import com.kafkareplay.utils.KafkaReplayConverter
 import org.springframework.stereotype.Service
 import java.util.*
+import org.apache.kafka.common.header.Headers
+import org.slf4j.LoggerFactory
 
 @Service
 class KafkaReplayService(
   private val kafkaReplayMongoRepository: KafkaReplayMongoRepository,
   private val retrySender: RetryTopicSender,
+  private val objectMapper: ObjectMapper
 ) {
 
+  companion object {
+    private val LOG = LoggerFactory.getLogger(KafkaReplayService::class.java)
+  }
 
   fun deleteMessage(id: UUID): KafkaReplayDao {
     val message = getMessage(id)
@@ -46,21 +55,23 @@ class KafkaReplayService(
     }.distinct()
   }
 
-  fun saveMessage(topic: String, key: String, payload: String, exceptionStacktrace: String) {
+  fun saveMessage(topic: String, key: String, payload: String, exceptionStacktrace: String, headers: Map<String, Any>) {
     val uuid = UUID.randomUUID()
+
     val obj = KafkaReplayDao(
       id = uuid,
       topic = topic.replace("_ERROR", "_RETRY"),
       key = key,
       payload = payload,
-      exceptionStacktrace = exceptionStacktrace
+      exceptionStacktrace = exceptionStacktrace,
+      headers = headers
     )
     kafkaReplayMongoRepository.save(obj)
   }
 
   fun retryMessage(id: UUID): KafkaReplayDao {
     val message = getMessage(id)
-    retrySender.send(message.topic, message.key, message.payload)
+    retrySender.send(message.topic, message.key, KafkaReplayConverter.decodeBase64(message.payload))
     return deleteMessage(id)
   }
 
@@ -68,7 +79,7 @@ class KafkaReplayService(
     val responseList = mutableListOf<KafkaReplayDao>()
 
     getMessagesByTopic(topic).forEach {
-      retrySender.send(it.topic, it.key, it.payload)
+      retrySender.send(it.topic, it.key, KafkaReplayConverter.decodeBase64(it.payload))
       kafkaReplayMongoRepository.delete(it)
       responseList.add(it)
     }

@@ -1,6 +1,7 @@
 package com.kafkareplay.kafka
 
 import com.kafkareplay.service.KafkaReplayService
+import org.apache.kafka.common.utils.Bytes
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.KafkaHeaders
@@ -17,7 +18,7 @@ class RetryTopicSender(
     private val logger = LoggerFactory.getLogger(KafkaReplayService::class.java)
 }
 
-  fun send(topic: String, key: String, data: Any) {
+  fun send(topic: String, key: String, data: String) {
     val message = MessageBuilder
       .withPayload(data)
       .setHeader(KafkaHeaders.TOPIC, topic)

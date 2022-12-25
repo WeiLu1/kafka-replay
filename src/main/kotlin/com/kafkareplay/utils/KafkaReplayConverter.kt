@@ -2,16 +2,38 @@ package com.kafkareplay.utils
 
 import com.kafkareplay.model.dto.KafkaReplayResponse
 import com.kafkareplay.mongo.dao.KafkaReplayDao
+import com.kafkareplay.service.KafkaReplayService
+import java.util.*
+import org.slf4j.LoggerFactory
 
 object KafkaReplayConverter {
+  private val LOG = LoggerFactory.getLogger(KafkaReplayConverter::class.java)
+
 
   fun convertToResponseDto(kafkaReplayDao: KafkaReplayDao): KafkaReplayResponse {
     return KafkaReplayResponse(
       id =  kafkaReplayDao.id,
       topic = kafkaReplayDao.topic,
       key = kafkaReplayDao.key,
-      payload = kafkaReplayDao.payload,
+      payload = decodeBase64(kafkaReplayDao.payload),
       exceptionStacktrace = kafkaReplayDao.exceptionStacktrace
     )
+  }
+
+  fun convertToBase64(value: String): String {
+    val converted = Base64.getEncoder().encodeToString(value.toByteArray())
+    LOG.info("encoded = $value & converted = $converted")
+    return converted
+  }
+
+  fun decodeByteArray(encoded: String): ByteArray {
+    val decodedBytes = Base64.getDecoder().decode(encoded)
+    return decodedBytes
+  }
+  fun decodeBase64(encoded: String): String {
+    val decodedBytes = Base64.getDecoder().decode(encoded)
+    val decoded = String(decodedBytes)
+    LOG.info("encoded = $encoded & decoded = $decoded")
+    return decoded
   }
 }
