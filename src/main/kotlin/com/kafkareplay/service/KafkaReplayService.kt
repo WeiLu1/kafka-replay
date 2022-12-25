@@ -9,8 +9,7 @@ import com.kafkareplay.mongo.repository.KafkaReplayMongoRepository
 import com.kafkareplay.utils.KafkaReplayConverter
 import org.springframework.stereotype.Service
 import java.util.*
-import org.apache.kafka.common.header.Headers
-import org.slf4j.LoggerFactory
+import mu.KotlinLogging
 
 @Service
 class KafkaReplayService(
@@ -20,7 +19,7 @@ class KafkaReplayService(
 ) {
 
   companion object {
-    private val LOG = LoggerFactory.getLogger(KafkaReplayService::class.java)
+    private val LOG = KotlinLogging.logger {}
   }
 
   fun deleteMessage(id: UUID): KafkaReplayDao {

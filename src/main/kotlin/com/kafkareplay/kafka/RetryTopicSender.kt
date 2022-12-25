@@ -1,13 +1,10 @@
 package com.kafkareplay.kafka
 
-import com.kafkareplay.service.KafkaReplayService
-import org.apache.kafka.common.utils.Bytes
-import org.slf4j.LoggerFactory
+import mu.KotlinLogging
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Component
-import kotlin.reflect.typeOf
 
 @Component
 class RetryTopicSender(
@@ -15,14 +12,14 @@ class RetryTopicSender(
 ) {
 
   companion object {
-    private val logger = LoggerFactory.getLogger(KafkaReplayService::class.java)
+    private val LOG = KotlinLogging.logger {}
 }
 
   fun send(topic: String, key: String, data: String) {
     val message = MessageBuilder
       .withPayload(data)
       .setHeader(KafkaHeaders.TOPIC, topic)
-      .setHeader(KafkaHeaders.MESSAGE_KEY, key)
+      .setHeader(KafkaHeaders.KEY, key)
       .build();
 
    kafkaTemplate.send(message)

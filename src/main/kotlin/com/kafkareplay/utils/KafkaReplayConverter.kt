@@ -2,12 +2,11 @@ package com.kafkareplay.utils
 
 import com.kafkareplay.model.dto.KafkaReplayResponse
 import com.kafkareplay.mongo.dao.KafkaReplayDao
-import com.kafkareplay.service.KafkaReplayService
 import java.util.*
-import org.slf4j.LoggerFactory
+import mu.KotlinLogging
 
 object KafkaReplayConverter {
-  private val LOG = LoggerFactory.getLogger(KafkaReplayConverter::class.java)
+  private val LOG = KotlinLogging.logger {}
 
 
   fun convertToResponseDto(kafkaReplayDao: KafkaReplayDao): KafkaReplayResponse {

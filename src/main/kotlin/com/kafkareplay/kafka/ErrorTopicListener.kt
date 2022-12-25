@@ -2,8 +2,8 @@ package com.kafkareplay.kafka
 
 import com.kafkareplay.service.KafkaReplayService
 import com.kafkareplay.utils.KafkaReplayConverter.convertToBase64
+import mu.KotlinLogging
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
@@ -16,14 +16,14 @@ class ErrorTopicListener(
 ) {
 
   companion object {
-    private val LOG = LoggerFactory.getLogger(ErrorTopicListener::class.java)
+    private val LOG = KotlinLogging.logger {}
   }
 
   @KafkaListener(topicPattern = ".*_ERROR", containerFactory = "kafkaListenerContainerFactory", groupId = "ms-kafka-replay")
   fun onErrorEvent(@Payload event: ConsumerRecord<String, String>,
                    @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String,
                    @Header(KafkaHeaders.DLT_EXCEPTION_STACKTRACE) exceptionMessage: String,
-                   @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) key: String
+                   @Header(KafkaHeaders.RECEIVED_KEY) key: String
 
   ) {
     LOG.info("Payload: {} - Base64: {}", event.value(), convertToBase64(event.value()))
