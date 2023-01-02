@@ -10,6 +10,7 @@ import com.kafkareplay.mongo.dao.KafkaTopicOrder
 import com.kafkareplay.mongo.dao.PositionReferenceId
 import com.kafkareplay.mongo.repository.KafkaReplayMongoRepository
 import com.kafkareplay.utils.KafkaReplayConverter
+import com.kafkareplay.utils.KafkaReplayV2Converter.decodeBase64
 import org.springframework.stereotype.Service
 import java.util.*
 import mu.KotlinLogging
@@ -93,7 +94,7 @@ class KafkaReplayServiceV2(
 
     messages.keys.forEach { key ->
       messages[key]?.forEach { message ->
-        retrySender.send(topic, key, message.payload, message.headers)
+        retrySender.send(topic, key, decodeBase64(message.payload), message.headers)
       }
 
       kafkaReplayMongoRepository.deleteAllByTopicAndKey(topic, key)
