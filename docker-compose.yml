@@ -62,3 +62,22 @@ services:
       - MYSQL_PASSWORD=An0thrS3crt
       - MYSQL_USER=citizix_user
       - MYSQL_DATABASE=citizix_db
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    restart: "no"
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "broker:9092"
+      JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+    depends_on:
+      - "broker"
+  mongoui:
+    image: huggingface/mongoku
+    ports:
+      - 3100:3100
+    environment:
+      MONGOKU_DEFAULT_HOST: "mongodb://root:rootpassword@mongodb_container:27017"
+    depends_on:
+      - "mongodb_container"

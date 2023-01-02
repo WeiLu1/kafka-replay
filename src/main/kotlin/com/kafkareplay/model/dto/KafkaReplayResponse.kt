@@ -11,11 +11,11 @@ data class KafkaReplayResponse (
   val topic: String,
 
   @JsonProperty("key")
-  val key: String,
+  val key: String?,
 
   @JsonProperty("payload")
   val payload: String,
 
   @JsonProperty("exceptionStacktrace")
   val exceptionStacktrace: String,
-  )
+)

@@ -8,9 +8,10 @@ import java.util.*
 data class KafkaReplayDao (
   @Id
   val id: UUID,
+  val originalPositionReference: PositionReferenceId,
   val topic: String,
-  val key: String,
+  val key: String?,
   val payload: String,
   val exceptionStacktrace: String,
-  val headers: Map<String, Any>
+  val headers: Map<String, ByteArray>
 )

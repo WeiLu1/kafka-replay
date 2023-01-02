@@ -1,10 +1,10 @@
 package com.kafkareplay.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.kafkareplay.exception.KafkaReplayNotFoundException
-import com.kafkareplay.kafka.ErrorTopicListener
 import com.kafkareplay.kafka.RetryTopicSender
 import com.kafkareplay.mongo.dao.KafkaReplayDao
+import com.kafkareplay.mongo.dao.KafkaTopicOrder
+import com.kafkareplay.mongo.dao.PositionReferenceId
 import com.kafkareplay.mongo.repository.KafkaReplayMongoRepository
 import com.kafkareplay.utils.KafkaReplayConverter
 import org.springframework.stereotype.Service
@@ -14,8 +14,7 @@ import mu.KotlinLogging
 @Service
 class KafkaReplayService(
   private val kafkaReplayMongoRepository: KafkaReplayMongoRepository,
-  private val retrySender: RetryTopicSender,
-  private val objectMapper: ObjectMapper
+  private val retrySender: RetryTopicSender
 ) {
 
   companion object {
@@ -29,9 +28,9 @@ class KafkaReplayService(
   }
 
   fun deleteAllMessagesByTopic(topic: String): List<KafkaReplayDao> {
-    val messaages = getMessagesByTopic(topic)
+    val messages = getMessagesByTopic(topic)
     kafkaReplayMongoRepository.deleteAllByTopic(topic)
-    return messaages
+    return messages
   }
 
   fun getMessage(id: UUID): KafkaReplayDao {
@@ -41,7 +40,9 @@ class KafkaReplayService(
   }
 
   fun getMessagesByTopic(topic: String): List<KafkaReplayDao> {
-    return kafkaReplayMongoRepository.findAllByTopic(topic)
+    return kafkaReplayMongoRepository.findAllByTopic(
+      topic
+    )
   }
 
   fun getAllMessages(): List<KafkaReplayDao> {
@@ -54,18 +55,24 @@ class KafkaReplayService(
     }.distinct()
   }
 
-  fun saveMessage(topic: String, key: String, payload: String, exceptionStacktrace: String, headers: Map<String, Any>) {
+  fun saveMessage(topic: String, key: String?, payload: String, exceptionStacktrace: String, headers: Map<String, ByteArray>) {
     val uuid = UUID.randomUUID()
 
-    val obj = KafkaReplayDao(
+    val referenceId = headers["RETRYING_REFERENCE_ID"]?.let { String(it).split(":") }
+    LOG.info("Header found: $referenceId")
+    val originalPartition = referenceId?.get(0)?.toInt()
+    val originalOffset = referenceId?.get(1)?.toLong()
+
+    val kafkaReplay = KafkaReplayDao(
       id = uuid,
       topic = topic.replace("_ERROR", "_RETRY"),
       key = key,
       payload = payload,
       exceptionStacktrace = exceptionStacktrace,
-      headers = headers
+      headers = headers,
+      originalPositionReference = PositionReferenceId(originalPartition, originalOffset, topic.replace("_ERROR", "_RETRY"), KafkaTopicOrder.SORTED)
     )
-    kafkaReplayMongoRepository.save(obj)
+    kafkaReplayMongoRepository.save(kafkaReplay)
   }
 
   fun retryMessage(id: UUID): KafkaReplayDao {
@@ -75,13 +82,13 @@ class KafkaReplayService(
   }
 
   fun retryAllMessagesByTopic(topic: String): List<KafkaReplayDao> {
-    val responseList = mutableListOf<KafkaReplayDao>()
+    val responseList = getMessagesByTopic(topic)
 
-    getMessagesByTopic(topic).forEach {
+    responseList.forEach {
       retrySender.send(it.topic, it.key, KafkaReplayConverter.decodeBase64(it.payload))
       kafkaReplayMongoRepository.delete(it)
-      responseList.add(it)
     }
+
     return responseList
   }
 

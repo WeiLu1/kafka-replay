@@ -15,13 +15,19 @@ class RetryTopicSender(
     private val LOG = KotlinLogging.logger {}
 }
 
-  fun send(topic: String, key: String, data: String) {
-    val message = MessageBuilder
+  fun send(topic: String, key: String?, data: String, headers: Map<String, Any> = emptyMap()) {
+    val messageBuilder = MessageBuilder
       .withPayload(data)
       .setHeader(KafkaHeaders.TOPIC, topic)
       .setHeader(KafkaHeaders.KEY, key)
-      .build();
 
-   kafkaTemplate.send(message)
+    if (headers.isNotEmpty()) {
+      headers.forEach {
+        messageBuilder.setHeader(it.key, it.value)
+      }
+    }
+
+   kafkaTemplate.send(messageBuilder.build())
   }
+
 }

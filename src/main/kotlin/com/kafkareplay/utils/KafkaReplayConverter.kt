@@ -25,10 +25,6 @@ object KafkaReplayConverter {
     return converted
   }
 
-  fun decodeByteArray(encoded: String): ByteArray {
-    val decodedBytes = Base64.getDecoder().decode(encoded)
-    return decodedBytes
-  }
   fun decodeBase64(encoded: String): String {
     val decodedBytes = Base64.getDecoder().decode(encoded)
     val decoded = String(decodedBytes)

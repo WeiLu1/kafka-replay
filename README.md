@@ -20,7 +20,9 @@ Run both the `kafka-replay` and `kafka-failure` services together.
 ### kafka-replay
 
 Service will be hosted on localhost:8090.\
-All endpoints begin with: `internal/v1/messages/`
+Access endpoints from Open API: [here](http://localhost:8090/swagger-ui/)
+
+All endpoints begin with (**DEPRECATED**): `internal/v1/messages/`
 
 - Get message using ID\
 `GET`: `internal/v1/messages/{id}`

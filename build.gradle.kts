@@ -18,12 +18,15 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.springframework.kafka:spring-kafka")
 
 	implementation("io.github.microutils:kotlin-logging:2.1.23")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
+	implementation("io.micrometer:micrometer-tracing-bridge-brave")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.kafka:spring-kafka-test")
