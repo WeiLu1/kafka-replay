@@ -7,13 +7,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
-import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.support.converter.StringJsonMessageConverter
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS
-import org.springframework.kafka.support.serializer.JsonDeserializer
 
 
 @Configuration
@@ -33,11 +28,16 @@ class KafkaListenerConfig(
   )
 
   @Bean
-  fun kafkaListenerContainerFactory(consumerFactory: ConsumerFactory<Int, String>) =
-    ConcurrentKafkaListenerContainerFactory<Int, String>().also {
+  fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<Int, String>  {
+    val listenerContainerFactory = ConcurrentKafkaListenerContainerFactory<Int, String>().also {
       it.consumerFactory = consumerFactory()
       it.setMessageConverter(StringJsonMessageConverter())
     }
+
+    listenerContainerFactory.containerProperties.isObservationEnabled = true
+    return listenerContainerFactory
+  }
+
 
   fun consumerFactory() = DefaultKafkaConsumerFactory<Int, String>(consumerProps)
 }

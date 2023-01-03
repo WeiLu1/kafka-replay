@@ -31,6 +31,8 @@ class KafkaProducerConfig(
 
   @Bean
   fun kafkaTemplate(): KafkaTemplate<String, Any> {
-    return KafkaTemplate(producerFactory())
+    val kafkaTemplate = KafkaTemplate(producerFactory())
+    kafkaTemplate.setObservationEnabled(true)
+    return kafkaTemplate
   }
 }
