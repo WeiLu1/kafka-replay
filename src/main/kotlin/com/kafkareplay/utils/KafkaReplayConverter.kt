@@ -1,7 +1,7 @@
 package com.kafkareplay.utils
 
-import com.kafkareplay.model.dto.KafkaReplayResponse
-import com.kafkareplay.mongo.dao.KafkaReplayDao
+import com.kafkareplay.adapter.driver.api.response.KafkaReplayResponse
+import com.kafkareplay.adapter.driven.repository.kafkareplay.mongo.KafkaReplayEntity
 import java.util.*
 import mu.KotlinLogging
 
@@ -9,13 +9,13 @@ object KafkaReplayConverter {
   private val LOG = KotlinLogging.logger {}
 
 
-  fun convertToResponseDto(kafkaReplayDao: KafkaReplayDao): KafkaReplayResponse {
+  fun convertToResponseDto(kafkaReplayEntity: KafkaReplayEntity): KafkaReplayResponse {
     return KafkaReplayResponse(
-      id =  kafkaReplayDao.id,
-      topic = kafkaReplayDao.topic,
-      key = kafkaReplayDao.key,
-      payload = decodeBase64(kafkaReplayDao.payload),
-      exceptionStacktrace = kafkaReplayDao.exceptionStacktrace
+      id =  kafkaReplayEntity.id,
+      topic = kafkaReplayEntity.topic,
+      key = kafkaReplayEntity.key,
+      payload = decodeBase64(kafkaReplayEntity.payload),
+      exceptionStacktrace = kafkaReplayEntity.exceptionStacktrace
     )
   }
 
